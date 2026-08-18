@@ -84,6 +84,18 @@ constructor(
 
     private var items: MutableList<PlayerItem> = mutableListOf()
 
+    /** The item currently being played, if any. */
+    val currentItem: PlayerItem?
+        get() = items.getOrNull(player.currentMediaItemIndex)
+
+    suspend fun setRating(itemId: UUID, rating: Int) = repository.setRating(itemId, rating)
+
+    suspend fun clearRating(itemId: UUID) = repository.clearRating(itemId)
+
+    suspend fun deleteItem(itemId: UUID) = repository.deleteItem(itemId)
+
+    suspend fun getItem(itemId: UUID) = repository.getItem(itemId)
+
     private val trackSelector = DefaultTrackSelector(application)
     var playWhenReady = true
     private var currentMediaItemIndex = savedStateHandle["mediaItemIndex"] ?: 0

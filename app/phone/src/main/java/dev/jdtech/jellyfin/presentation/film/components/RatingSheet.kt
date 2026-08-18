@@ -47,78 +47,100 @@ fun RatingSheet(
     onDelete: () -> Unit,
     onDismiss: () -> Unit,
 ) {
+    ModalBottomSheet(onDismissRequest = onDismiss) {
+        RatingSheetContent(
+            itemName = itemName,
+            currentRating = currentRating,
+            onRate = onRate,
+            onClearRating = onClearRating,
+            onDelete = onDelete,
+        )
+    }
+}
+
+/**
+ * Rating content usable both inside [RatingSheet] (Compose bottom sheet) and inside
+ * a classic View-based BottomSheetDialog (e.g. from the player Activity).
+ */
+@Composable
+fun RatingSheetContent(
+    itemName: String,
+    currentRating: Float?,
+    onRate: (Int) -> Unit,
+    onClearRating: () -> Unit,
+    onDelete: () -> Unit,
+    modifier: Modifier = Modifier,
+) {
     var showDeleteConfirmation by remember { mutableStateOf(false) }
     val currentRatingInt = currentRating?.toInt()
 
-    ModalBottomSheet(onDismissRequest = onDismiss) {
-        Column(
-            modifier =
-                Modifier
-                    .fillMaxWidth()
-                    .padding(horizontal = 24.dp, vertical = 8.dp),
-            horizontalAlignment = Alignment.CenterHorizontally,
+    Column(
+        modifier =
+            modifier
+                .fillMaxWidth()
+                .padding(horizontal = 24.dp, vertical = 8.dp),
+        horizontalAlignment = Alignment.CenterHorizontally,
+    ) {
+        Text(
+            text = itemName,
+            style = MaterialTheme.typography.titleMedium,
+            textAlign = TextAlign.Center,
+            modifier = Modifier.fillMaxWidth(),
+        )
+        Text(
+            text =
+                currentRatingInt?.let {
+                    stringResource(CoreR.string.rating_value, it)
+                } ?: stringResource(CoreR.string.rating_none),
+            style = MaterialTheme.typography.bodyMedium,
+            color = MaterialTheme.colorScheme.onSurfaceVariant,
+            modifier = Modifier.padding(top = 8.dp),
+        )
+        Row(
+            modifier = Modifier.padding(top = 16.dp),
+            horizontalArrangement = Arrangement.spacedBy(4.dp),
         ) {
-            Text(
-                text = itemName,
-                style = MaterialTheme.typography.titleMedium,
-                textAlign = TextAlign.Center,
-                modifier = Modifier.fillMaxWidth(),
-            )
-            Text(
-                text =
-                    currentRatingInt?.let {
-                        stringResource(CoreR.string.rating_value, it)
-                    } ?: stringResource(CoreR.string.rating_none),
-                style = MaterialTheme.typography.bodyMedium,
-                color = MaterialTheme.colorScheme.onSurfaceVariant,
-                modifier = Modifier.padding(top = 8.dp),
-            )
-            Row(
-                modifier = Modifier.padding(top = 16.dp),
-                horizontalArrangement = Arrangement.spacedBy(4.dp),
-            ) {
-                for (star in 1..10) {
-                    Icon(
-                        painter = painterResource(CoreR.drawable.ic_star),
-                        contentDescription =
-                            stringResource(CoreR.string.rating_star_description, star),
-                        modifier =
-                            Modifier
-                                .size(28.dp)
-                                .clickable { onRate(star) },
-                        tint =
-                            if (currentRatingInt != null && star <= currentRatingInt) {
-                                StarColor
-                            } else {
-                                MaterialTheme.colorScheme.outline
-                            },
-                    )
-                }
-            }
-            if (currentRatingInt != null) {
-                TextButton(
-                    onClick = onClearRating,
-                    modifier = Modifier.padding(top = 8.dp),
-                ) {
-                    Text(stringResource(CoreR.string.rating_clear))
-                }
-            }
-            HorizontalDivider(modifier = Modifier.padding(vertical = 12.dp))
-            OutlinedButton(
-                onClick = { showDeleteConfirmation = true },
-                modifier = Modifier.fillMaxWidth(),
-            ) {
+            for (star in 1..10) {
                 Icon(
-                    painter = painterResource(CoreR.drawable.ic_trash),
-                    contentDescription = null,
-                    tint = MaterialTheme.colorScheme.error,
-                )
-                Text(
-                    text = stringResource(CoreR.string.rating_delete),
-                    color = MaterialTheme.colorScheme.error,
-                    modifier = Modifier.padding(start = 8.dp),
+                    painter = painterResource(CoreR.drawable.ic_star),
+                    contentDescription =
+                        stringResource(CoreR.string.rating_star_description, star),
+                    modifier =
+                        Modifier
+                            .size(28.dp)
+                            .clickable { onRate(star) },
+                    tint =
+                        if (currentRatingInt != null && star <= currentRatingInt) {
+                            StarColor
+                        } else {
+                            MaterialTheme.colorScheme.outline
+                        },
                 )
             }
+        }
+        if (currentRatingInt != null) {
+            TextButton(
+                onClick = onClearRating,
+                modifier = Modifier.padding(top = 8.dp),
+            ) {
+                Text(stringResource(CoreR.string.rating_clear))
+            }
+        }
+        HorizontalDivider(modifier = Modifier.padding(vertical = 12.dp))
+        OutlinedButton(
+            onClick = { showDeleteConfirmation = true },
+            modifier = Modifier.fillMaxWidth(),
+        ) {
+            Icon(
+                painter = painterResource(CoreR.drawable.ic_trash),
+                contentDescription = null,
+                tint = MaterialTheme.colorScheme.error,
+            )
+            Text(
+                text = stringResource(CoreR.string.rating_delete),
+                color = MaterialTheme.colorScheme.error,
+                modifier = Modifier.padding(start = 8.dp),
+            )
         }
     }
 

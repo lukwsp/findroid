@@ -24,8 +24,10 @@ import android.widget.ImageButton
 import android.widget.ImageView
 import android.widget.Space
 import android.widget.TextView
+import android.widget.Toast
 import androidx.activity.viewModels
 import androidx.core.view.isVisible
+import androidx.compose.ui.platform.ComposeView
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.lifecycleScope
 import androidx.lifecycle.repeatOnLifecycle
@@ -33,12 +35,15 @@ import androidx.media3.common.C
 import androidx.media3.ui.DefaultTimeBar
 import androidx.media3.ui.PlayerControlView
 import androidx.media3.ui.PlayerView
+import com.google.android.material.bottomsheet.BottomSheetDialog
 import dagger.hilt.android.AndroidEntryPoint
 import dev.jdtech.jellyfin.databinding.ActivityPlayerBinding
 import dev.jdtech.jellyfin.player.local.presentation.PlayerEvents
 import dev.jdtech.jellyfin.player.local.presentation.PlayerViewModel
+import dev.jdtech.jellyfin.presentation.film.components.RatingSheetContent
 import dev.jdtech.jellyfin.presentation.player.SpeedSelectionDialogFragment
 import dev.jdtech.jellyfin.presentation.player.TrackSelectionDialogFragment
+import dev.jdtech.jellyfin.presentation.theme.FindroidTheme
 import dev.jdtech.jellyfin.settings.domain.AppPreferences
 import dev.jdtech.jellyfin.utils.PlayerGestureHelper
 import dev.jdtech.jellyfin.utils.PreviewScrubListener
@@ -134,6 +139,7 @@ class PlayerActivity : BasePlayerActivity() {
         val audioButton = binding.playerView.findViewById<ImageButton>(R.id.btn_audio_track)
         val subtitleButton = binding.playerView.findViewById<ImageButton>(R.id.btn_subtitle)
         val speedButton = binding.playerView.findViewById<ImageButton>(R.id.btn_speed)
+        val ratingButton = binding.playerView.findViewById<ImageButton>(R.id.btn_rating)
         skipSegmentButton = binding.playerView.findViewById(R.id.btn_skip_segment)
         val pipButton = binding.playerView.findViewById<ImageButton>(R.id.btn_pip)
         val lockButton = binding.playerView.findViewById<ImageButton>(R.id.btn_lockview)
@@ -287,6 +293,8 @@ class PlayerActivity : BasePlayerActivity() {
         val exoPlayerControlView = findViewById<FrameLayout>(R.id.player_controls)
         val lockedLayout = findViewById<FrameLayout>(R.id.locked_player_view)
 
+        ratingButton.setOnClickListener { showRatingSheet() }
+
         lockButton.setOnClickListener {
             exoPlayerControlView.visibility = View.GONE
             lockedLayout.visibility = View.VISIBLE
@@ -356,6 +364,75 @@ class PlayerActivity : BasePlayerActivity() {
                 !isControlsLocked
         ) {
             pictureInPicture()
+        }
+    }
+
+    private fun showRatingSheet() {
+        val item = viewModel.currentItem ?: return
+        lifecycleScope.launch {
+            val currentRating =
+                try {
+                    viewModel.getItem(item.itemId)?.myRating
+                } catch (_: Exception) {
+                    null
+                }
+            val dialog = BottomSheetDialog(this@PlayerActivity)
+            val composeView =
+                ComposeView(this@PlayerActivity).apply {
+                    setContent {
+                        FindroidTheme {
+                            RatingSheetContent(
+                                itemName = item.name,
+                                currentRating = currentRating,
+                                onRate = { rating ->
+                                    dialog.dismiss()
+                                    lifecycleScope.launch {
+                                        try {
+                                            viewModel.setRating(item.itemId, rating)
+                                        } catch (e: Exception) {
+                                            Toast.makeText(
+                                                this@PlayerActivity,
+                                                e.localizedMessage,
+                                                Toast.LENGTH_SHORT,
+                                            ).show()
+                                        }
+                                    }
+                                },
+                                onClearRating = {
+                                    dialog.dismiss()
+                                    lifecycleScope.launch {
+                                        try {
+                                            viewModel.clearRating(item.itemId)
+                                        } catch (e: Exception) {
+                                            Toast.makeText(
+                                                this@PlayerActivity,
+                                                e.localizedMessage,
+                                                Toast.LENGTH_SHORT,
+                                            ).show()
+                                        }
+                                    }
+                                },
+                                onDelete = {
+                                    dialog.dismiss()
+                                    lifecycleScope.launch {
+                                        try {
+                                            viewModel.deleteItem(item.itemId)
+                                            finishPlayback()
+                                        } catch (e: Exception) {
+                                            Toast.makeText(
+                                                this@PlayerActivity,
+                                                e.localizedMessage,
+                                                Toast.LENGTH_SHORT,
+                                            ).show()
+                                        }
+                                    }
+                                },
+                            )
+                        }
+                    }
+                }
+            dialog.setContentView(composeView)
+            dialog.show()
         }
     }
 

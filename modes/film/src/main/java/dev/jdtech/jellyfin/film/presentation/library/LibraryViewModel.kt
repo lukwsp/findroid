@@ -44,6 +44,7 @@ constructor(
         val itemType =
             when (libraryType) {
                 CollectionType.Movies -> listOf(BaseItemKind.MOVIE)
+                CollectionType.HomeVideos -> listOf(BaseItemKind.VIDEO)
                 CollectionType.TvShows -> listOf(BaseItemKind.SERIES)
                 CollectionType.BoxSets -> listOf(BaseItemKind.BOX_SET)
                 CollectionType.Mixed,

@@ -31,6 +31,7 @@ data class FindroidShow(
     val trailer: String?,
     override val images: FindroidImages,
     override val chapters: List<FindroidChapter> = emptyList(),
+    override val myRating: Float? = null,
 ) : FindroidItem
 
 fun BaseItemDto.toFindroidShow(jellyfinRepository: JellyfinRepository): FindroidShow {
@@ -41,6 +42,7 @@ fun BaseItemDto.toFindroidShow(jellyfinRepository: JellyfinRepository): Findroid
         overview = overview.orEmpty(),
         played = userData?.played == true,
         favorite = userData?.isFavorite == true,
+        myRating = userData?.rating?.toFloat(),
         canPlay = playAccess != PlayAccess.NONE,
         canDownload = canDownload == true,
         unplayedItemCount = userData?.unplayedItemCount,
@@ -68,6 +70,7 @@ fun FindroidShowDto.toFindroidShow(database: ServerDatabaseDao, userId: UUID): F
         overview = overview,
         played = userData.played,
         favorite = userData.favorite,
+        myRating = null,
         canPlay = true,
         canDownload = false,
         unplayedItemCount = null,

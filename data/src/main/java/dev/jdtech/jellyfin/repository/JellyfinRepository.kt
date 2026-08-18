@@ -110,6 +110,23 @@ interface JellyfinRepository {
 
     suspend fun markAsUnplayed(itemId: UUID)
 
+    /**
+     * Set the user's 1-10 rating for an item via the Ratings plugin
+     * (https://github.com/K3ntas/jellyfin-plugin-ratings).
+     */
+    suspend fun setRating(itemId: UUID, rating: Int)
+
+    /**
+     * Remove the user's rating for an item via the Ratings plugin.
+     */
+    suspend fun clearRating(itemId: UUID)
+
+    /**
+     * Delete an item from the server (removes the physical file, requires
+     * EnableContentDeletion for the current user).
+     */
+    suspend fun deleteItem(itemId: UUID)
+
     fun getBaseUrl(): String
 
     suspend fun updateDeviceName(name: String)

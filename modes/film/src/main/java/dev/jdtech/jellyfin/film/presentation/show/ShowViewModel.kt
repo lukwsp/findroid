@@ -10,7 +10,9 @@ import dev.jdtech.jellyfin.repository.JellyfinRepository
 import java.util.UUID
 import javax.inject.Inject
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.asSharedFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
@@ -20,6 +22,9 @@ import org.jellyfin.sdk.model.api.PersonKind
 class ShowViewModel @Inject constructor(private val repository: JellyfinRepository) : ViewModel() {
     private val _state = MutableStateFlow(ShowState())
     val state = _state.asStateFlow()
+
+    private val _events = MutableSharedFlow<ShowEvent>()
+    val events = _events.asSharedFlow()
 
     lateinit var showId: UUID
 
@@ -96,6 +101,36 @@ class ShowViewModel @Inject constructor(private val repository: JellyfinReposito
                 viewModelScope.launch {
                     repository.unmarkAsFavorite(showId)
                     loadShow(showId)
+                }
+            }
+            is ShowAction.SetRating -> {
+                viewModelScope.launch {
+                    try {
+                        repository.setRating(showId, action.rating)
+                        loadShow(showId)
+                    } catch (e: Exception) {
+                        _events.emit(ShowEvent.Error(e))
+                    }
+                }
+            }
+            is ShowAction.ClearRating -> {
+                viewModelScope.launch {
+                    try {
+                        repository.clearRating(showId)
+                        loadShow(showId)
+                    } catch (e: Exception) {
+                        _events.emit(ShowEvent.Error(e))
+                    }
+                }
+            }
+            is ShowAction.DeleteItem -> {
+                viewModelScope.launch {
+                    try {
+                        repository.deleteItem(showId)
+                        _events.emit(ShowEvent.ItemDeleted)
+                    } catch (e: Exception) {
+                        _events.emit(ShowEvent.Error(e))
+                    }
                 }
             }
             else -> Unit

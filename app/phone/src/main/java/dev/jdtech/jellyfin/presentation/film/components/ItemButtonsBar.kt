@@ -26,6 +26,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.window.core.layout.WindowSizeClass
@@ -45,6 +46,9 @@ fun ItemButtonsBar(
     onPlayClick: (startFromBeginning: Boolean) -> Unit,
     onMarkAsPlayedClick: () -> Unit,
     onMarkAsFavoriteClick: () -> Unit,
+    onRateItem: (Int) -> Unit = {},
+    onClearRating: () -> Unit = {},
+    onDeleteItem: () -> Unit = {},
     onDownloadClick: (storageIndex: Int) -> Unit,
     onDownloadCancelClick: () -> Unit,
     onDownloadDeleteClick: () -> Unit,
@@ -70,6 +74,7 @@ fun ItemButtonsBar(
     var storageSelectionDialogOpen by remember { mutableStateOf(false) }
     var cancelDownloadDialogOpen by remember { mutableStateOf(false) }
     var deleteDownloadDialogOpen by remember { mutableStateOf(false) }
+    var ratingSheetOpen by remember { mutableStateOf(false) }
 
     var selectedStorageIndex by remember { mutableIntStateOf(0) }
     var storageLocations = remember { context.getExternalFilesDirs(null) }
@@ -153,6 +158,13 @@ fun ItemButtonsBar(
                         }
                     }
                 }
+                FilledTonalIconButton(onClick = { ratingSheetOpen = true }) {
+                    Icon(
+                        painter = painterResource(CoreR.drawable.ic_star),
+                        contentDescription = stringResource(CoreR.string.rating),
+                        tint = if (item.myRating != null) RatingStarColor else LocalContentColor.current,
+                    )
+                }
                 if (downloaderState != null && !downloaderState.isDownloading) {
                     if (item.isDownloaded()) {
                         FilledTonalIconButton(onClick = { deleteDownloadDialogOpen = true }) {
@@ -233,6 +245,25 @@ fun ItemButtonsBar(
                     deleteDownloadDialogOpen = false
                 },
                 onDismiss = { deleteDownloadDialogOpen = false },
+            )
+        }
+        if (ratingSheetOpen) {
+            RatingSheet(
+                itemName = item.name,
+                currentRating = item.myRating,
+                onRate = {
+                    ratingSheetOpen = false
+                    onRateItem(it)
+                },
+                onClearRating = {
+                    ratingSheetOpen = false
+                    onClearRating()
+                },
+                onDelete = {
+                    ratingSheetOpen = false
+                    onDeleteItem()
+                },
+                onDismiss = { ratingSheetOpen = false },
             )
         }
     }

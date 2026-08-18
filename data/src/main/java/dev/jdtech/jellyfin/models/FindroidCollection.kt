@@ -20,6 +20,7 @@ data class FindroidCollection(
     val type: CollectionType,
     override val images: FindroidImages,
     override val chapters: List<FindroidChapter> = emptyList(),
+    override val myRating: Float? = null,
 ) : FindroidItem
 
 fun BaseItemDto.toFindroidCollection(jellyfinRepository: JellyfinRepository): FindroidCollection? {

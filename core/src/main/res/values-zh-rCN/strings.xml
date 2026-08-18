@@ -108,4 +108,13 @@
     <string name="download_paused">已暂停</string>
     <string name="download_downloading">正在下载…</string>
     <string name="download_failed">下载失败</string>
+    <string name="rating_none">未评分</string>
+    <string name="rating_value">我的评分：%1$d/10</string>
+    <string name="rating_star_description">评分 %1$d 分（满分 10 分）</string>
+    <string name="rating_clear">清除评分</string>
+    <string name="rating_delete">从服务器删除</string>
+    <string name="rating_delete_title">删除“%1$s”？</string>
+    <string name="rating_delete_body">将永久删除服务器上的媒体及其文件，此操作不可恢复。</string>
+    <string name="rating_delete_confirm">删除</string>
+    <string name="rating">评分</string>
 </resources>

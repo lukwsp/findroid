@@ -536,6 +536,42 @@ class JellyfinRepositoryImpl(
         }
     }
 
+    override suspend fun setRating(itemId: UUID, rating: Int) {
+        require(rating in 1..10) { "Rating must be between 1 and 10" }
+        withContext(Dispatchers.IO) {
+            val response =
+                jellyfinApi.api.request(
+                    method = org.jellyfin.sdk.api.client.HttpMethod.POST,
+                    pathTemplate = "/Ratings/Items/{itemId}/Rating",
+                    pathParameters = mapOf("itemId" to itemId),
+                    queryParameters = mapOf("rating" to rating),
+                )
+            if (response.status !in 200..299) {
+                error("Failed to set rating for $itemId: HTTP ${response.status}")
+            }
+        }
+    }
+
+    override suspend fun clearRating(itemId: UUID) {
+        withContext(Dispatchers.IO) {
+            val response =
+                jellyfinApi.api.request(
+                    method = org.jellyfin.sdk.api.client.HttpMethod.DELETE,
+                    pathTemplate = "/Ratings/Items/{itemId}/Rating",
+                    pathParameters = mapOf("itemId" to itemId),
+                )
+            if (response.status !in 200..299) {
+                error("Failed to clear rating for $itemId: HTTP ${response.status}")
+            }
+        }
+    }
+
+    override suspend fun deleteItem(itemId: UUID) {
+        withContext(Dispatchers.IO) {
+            jellyfinApi.libraryApi.deleteItem(itemId)
+        }
+    }
+
     override fun getBaseUrl() = jellyfinApi.api.baseUrl.orEmpty()
 
     override suspend fun updateDeviceName(name: String) {

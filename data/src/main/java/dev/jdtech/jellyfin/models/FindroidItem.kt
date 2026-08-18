@@ -13,6 +13,7 @@ interface FindroidItem {
     val overview: String
     val played: Boolean
     val favorite: Boolean
+    val myRating: Float?
     val canPlay: Boolean
     val canDownload: Boolean
     val sources: List<FindroidSource>

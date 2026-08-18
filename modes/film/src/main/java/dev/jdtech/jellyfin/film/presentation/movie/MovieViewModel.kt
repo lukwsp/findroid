@@ -11,7 +11,9 @@ import dev.jdtech.jellyfin.settings.domain.AppPreferences
 import java.util.UUID
 import javax.inject.Inject
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.asSharedFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
@@ -27,6 +29,9 @@ constructor(
 ) : ViewModel() {
     private val _state = MutableStateFlow(MovieState())
     val state = _state.asStateFlow()
+
+    private val _events = MutableSharedFlow<MovieEvent>()
+    val events = _events.asSharedFlow()
 
     lateinit var movieId: UUID
 
@@ -98,6 +103,36 @@ constructor(
                 viewModelScope.launch {
                     repository.unmarkAsFavorite(movieId)
                     loadMovie(movieId)
+                }
+            }
+            is MovieAction.SetRating -> {
+                viewModelScope.launch {
+                    try {
+                        repository.setRating(movieId, action.rating)
+                        loadMovie(movieId)
+                    } catch (e: Exception) {
+                        _events.emit(MovieEvent.Error(e))
+                    }
+                }
+            }
+            is MovieAction.ClearRating -> {
+                viewModelScope.launch {
+                    try {
+                        repository.clearRating(movieId)
+                        loadMovie(movieId)
+                    } catch (e: Exception) {
+                        _events.emit(MovieEvent.Error(e))
+                    }
+                }
+            }
+            is MovieAction.DeleteItem -> {
+                viewModelScope.launch {
+                    try {
+                        repository.deleteItem(movieId)
+                        _events.emit(MovieEvent.ItemDeleted)
+                    } catch (e: Exception) {
+                        _events.emit(MovieEvent.Error(e))
+                    }
                 }
             }
             else -> Unit

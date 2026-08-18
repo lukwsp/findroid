@@ -25,6 +25,7 @@ data class FindroidSeason(
     override val unplayedItemCount: Int?,
     override val images: FindroidImages,
     override val chapters: List<FindroidChapter> = emptyList(),
+    override val myRating: Float? = null,
 ) : FindroidItem
 
 fun BaseItemDto.toFindroidSeason(jellyfinRepository: JellyfinRepository): FindroidSeason {
@@ -35,6 +36,7 @@ fun BaseItemDto.toFindroidSeason(jellyfinRepository: JellyfinRepository): Findro
         overview = overview.orEmpty(),
         played = userData?.played == true,
         favorite = userData?.isFavorite == true,
+        myRating = userData?.rating?.toFloat(),
         canPlay = playAccess != PlayAccess.NONE,
         canDownload = canDownload == true,
         unplayedItemCount = userData?.unplayedItemCount,
@@ -56,6 +58,7 @@ fun FindroidSeasonDto.toFindroidSeason(database: ServerDatabaseDao, userId: UUID
         overview = overview,
         played = userData.played,
         favorite = userData.favorite,
+        myRating = null,
         canPlay = true,
         canDownload = false,
         unplayedItemCount = null,

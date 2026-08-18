@@ -1,6 +1,7 @@
 package dev.jdtech.jellyfin.presentation.film
 
 import android.content.Intent
+import android.widget.Toast
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -45,6 +46,7 @@ import dev.jdtech.jellyfin.core.presentation.downloader.DownloaderViewModel
 import dev.jdtech.jellyfin.core.presentation.dummy.dummyEpisode
 import dev.jdtech.jellyfin.core.presentation.dummy.dummyVideoMetadata
 import dev.jdtech.jellyfin.film.presentation.episode.EpisodeAction
+import dev.jdtech.jellyfin.film.presentation.episode.EpisodeEvent
 import dev.jdtech.jellyfin.film.presentation.episode.EpisodeState
 import dev.jdtech.jellyfin.film.presentation.episode.EpisodeViewModel
 import dev.jdtech.jellyfin.presentation.film.components.ActorsRow
@@ -96,6 +98,15 @@ fun EpisodeScreen(
                 } else {
                     viewModel.loadEpisode(episodeId = episodeId)
                 }
+            }
+        }
+    }
+
+    ObserveAsEvents(viewModel.events) { event ->
+        when (event) {
+            is EpisodeEvent.ItemDeleted -> navigateBack()
+            is EpisodeEvent.Error -> {
+                Toast.makeText(context, event.error.localizedMessage, Toast.LENGTH_SHORT).show()
             }
         }
     }
@@ -237,6 +248,9 @@ private fun EpisodeScreenLayout(
                                 false -> onAction(EpisodeAction.MarkAsFavorite)
                             }
                         },
+                        onRateItem = { rating -> onAction(EpisodeAction.SetRating(rating)) },
+                        onClearRating = { onAction(EpisodeAction.ClearRating) },
+                        onDeleteItem = { onAction(EpisodeAction.DeleteItem) },
                         onTrailerClick = {},
                         onDownloadClick = { storageIndex ->
                             onDownloaderAction(DownloaderAction.Download(episode, storageIndex))

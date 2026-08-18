@@ -295,6 +295,20 @@ class JellyfinRepositoryOfflineImpl(
         }
     }
 
+    override suspend fun setRating(itemId: UUID, rating: Int) {
+        // Ratings are server-only (Ratings plugin writes UserData.Rating);
+        // offline mode has no local storage for them.
+        throw UnsupportedOperationException("Ratings are not supported in offline mode")
+    }
+
+    override suspend fun clearRating(itemId: UUID) {
+        throw UnsupportedOperationException("Ratings are not supported in offline mode")
+    }
+
+    override suspend fun deleteItem(itemId: UUID) {
+        throw UnsupportedOperationException("Delete is not supported in offline mode")
+    }
+
     override fun getBaseUrl(): String {
         return ""
     }

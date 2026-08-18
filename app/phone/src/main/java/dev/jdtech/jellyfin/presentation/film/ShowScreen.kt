@@ -44,10 +44,12 @@ import dev.jdtech.jellyfin.PlayerActivity
 import dev.jdtech.jellyfin.core.R as CoreR
 import dev.jdtech.jellyfin.core.presentation.dummy.dummyShow
 import dev.jdtech.jellyfin.film.presentation.show.ShowAction
+import dev.jdtech.jellyfin.film.presentation.show.ShowEvent
 import dev.jdtech.jellyfin.film.presentation.show.ShowState
 import dev.jdtech.jellyfin.film.presentation.show.ShowViewModel
 import dev.jdtech.jellyfin.models.FindroidItem
 import dev.jdtech.jellyfin.presentation.film.components.ActorsRow
+import dev.jdtech.jellyfin.utils.ObserveAsEvents
 import dev.jdtech.jellyfin.presentation.film.components.Direction
 import dev.jdtech.jellyfin.presentation.film.components.InfoText
 import dev.jdtech.jellyfin.presentation.film.components.ItemButtonsBar
@@ -78,6 +80,15 @@ fun ShowScreen(
     val state by viewModel.state.collectAsStateWithLifecycle()
 
     LaunchedEffect(true) { viewModel.loadShow(showId = showId) }
+
+    ObserveAsEvents(viewModel.events) { event ->
+        when (event) {
+            is ShowEvent.ItemDeleted -> navigateBack()
+            is ShowEvent.Error -> {
+                Toast.makeText(context, event.error.localizedMessage, Toast.LENGTH_SHORT).show()
+            }
+        }
+    }
 
     ShowScreenLayout(
         state = state,
@@ -203,6 +214,9 @@ private fun ShowScreenLayout(state: ShowState, onAction: (ShowAction) -> Unit) {
                                 false -> onAction(ShowAction.MarkAsFavorite)
                             }
                         },
+                        onRateItem = { rating -> onAction(ShowAction.SetRating(rating)) },
+                        onClearRating = { onAction(ShowAction.ClearRating) },
+                        onDeleteItem = { onAction(ShowAction.DeleteItem) },
                         onTrailerClick = { uri -> onAction(ShowAction.PlayTrailer(uri)) },
                         onDownloadClick = {},
                         onDownloadCancelClick = {},

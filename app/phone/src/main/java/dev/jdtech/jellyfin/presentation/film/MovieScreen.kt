@@ -43,6 +43,7 @@ import dev.jdtech.jellyfin.core.presentation.downloader.DownloaderViewModel
 import dev.jdtech.jellyfin.core.presentation.dummy.dummyMovie
 import dev.jdtech.jellyfin.core.presentation.dummy.dummyVideoMetadata
 import dev.jdtech.jellyfin.film.presentation.movie.MovieAction
+import dev.jdtech.jellyfin.film.presentation.movie.MovieEvent
 import dev.jdtech.jellyfin.film.presentation.movie.MovieState
 import dev.jdtech.jellyfin.film.presentation.movie.MovieViewModel
 import dev.jdtech.jellyfin.presentation.film.components.ActorsRow
@@ -92,6 +93,15 @@ fun MovieScreen(
                 } else {
                     viewModel.loadMovie(movieId = movieId)
                 }
+            }
+        }
+    }
+
+    ObserveAsEvents(viewModel.events) { event ->
+        when (event) {
+            is MovieEvent.ItemDeleted -> navigateBack()
+            is MovieEvent.Error -> {
+                Toast.makeText(context, event.error.localizedMessage, Toast.LENGTH_SHORT).show()
             }
         }
     }
@@ -234,6 +244,9 @@ private fun MovieScreenLayout(
                                 false -> onAction(MovieAction.MarkAsFavorite)
                             }
                         },
+                        onRateItem = { rating -> onAction(MovieAction.SetRating(rating)) },
+                        onClearRating = { onAction(MovieAction.ClearRating) },
+                        onDeleteItem = { onAction(MovieAction.DeleteItem) },
                         onTrailerClick = { uri -> onAction(MovieAction.PlayTrailer(uri)) },
                         onDownloadClick = { storageIndex ->
                             onDownloaderAction(DownloaderAction.Download(movie, storageIndex))

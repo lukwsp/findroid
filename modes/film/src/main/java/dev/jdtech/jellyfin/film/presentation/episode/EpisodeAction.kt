@@ -13,6 +13,12 @@ sealed interface EpisodeAction {
 
     data object UnmarkAsFavorite : EpisodeAction
 
+    data class SetRating(val rating: Int) : EpisodeAction
+
+    data object ClearRating : EpisodeAction
+
+    data object DeleteItem : EpisodeAction
+
     data object OnBackClick : EpisodeAction
 
     data object OnHomeClick : EpisodeAction

@@ -11,7 +11,9 @@ import dev.jdtech.jellyfin.settings.domain.AppPreferences
 import java.util.UUID
 import javax.inject.Inject
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.asSharedFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
@@ -27,6 +29,9 @@ constructor(
 ) : ViewModel() {
     private val _state = MutableStateFlow(EpisodeState())
     val state = _state.asStateFlow()
+
+    private val _events = MutableSharedFlow<EpisodeEvent>()
+    val events = _events.asSharedFlow()
 
     lateinit var episodeId: UUID
 
@@ -82,6 +87,36 @@ constructor(
                 viewModelScope.launch {
                     repository.unmarkAsFavorite(episodeId)
                     loadEpisode(episodeId)
+                }
+            }
+            is EpisodeAction.SetRating -> {
+                viewModelScope.launch {
+                    try {
+                        repository.setRating(episodeId, action.rating)
+                        loadEpisode(episodeId)
+                    } catch (e: Exception) {
+                        _events.emit(EpisodeEvent.Error(e))
+                    }
+                }
+            }
+            is EpisodeAction.ClearRating -> {
+                viewModelScope.launch {
+                    try {
+                        repository.clearRating(episodeId)
+                        loadEpisode(episodeId)
+                    } catch (e: Exception) {
+                        _events.emit(EpisodeEvent.Error(e))
+                    }
+                }
+            }
+            is EpisodeAction.DeleteItem -> {
+                viewModelScope.launch {
+                    try {
+                        repository.deleteItem(episodeId)
+                        _events.emit(EpisodeEvent.ItemDeleted)
+                    } catch (e: Exception) {
+                        _events.emit(EpisodeEvent.Error(e))
+                    }
                 }
             }
             else -> Unit

@@ -109,4 +109,13 @@
     <string name="download_paused">Paused</string>
     <string name="download_downloading">Downloading…</string>
     <string name="download_failed">Failed to download</string>
+    <string name="rating_none">Not rated</string>
+    <string name="rating_value">My rating: %1$d/10</string>
+    <string name="rating_star_description">Rate %1$d out of 10</string>
+    <string name="rating_clear">Clear rating</string>
+    <string name="rating_delete">Delete from server</string>
+    <string name="rating_delete_title">Delete "%1$s"?</string>
+    <string name="rating_delete_body">This permanently deletes the media and its files on the server. This cannot be undone.</string>
+    <string name="rating_delete_confirm">Delete</string>
+    <string name="rating">Rating</string>
 </resources>

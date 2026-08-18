@@ -117,4 +117,6 @@
     <string name="rating_delete_body">将永久删除服务器上的媒体及其文件，此操作不可恢复。</string>
     <string name="rating_delete_confirm">删除</string>
     <string name="rating">评分</string>
+    <string name="filter_all">全部</string>
+    <string name="filter_high_rated">高分（≥%1$d）</string>
 </resources>

@@ -118,4 +118,6 @@
     <string name="rating_delete_body">This permanently deletes the media and its files on the server. This cannot be undone.</string>
     <string name="rating_delete_confirm">Delete</string>
     <string name="rating">Rating</string>
+    <string name="filter_all">All</string>
+    <string name="filter_high_rated">Highly rated (≥%1$d)</string>
 </resources>

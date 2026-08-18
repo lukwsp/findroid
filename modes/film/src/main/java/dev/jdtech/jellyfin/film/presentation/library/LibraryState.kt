@@ -11,6 +11,8 @@ data class LibraryState(
     val items: Flow<PagingData<FindroidItem>> = emptyFlow(),
     val sortBy: SortBy = SortBy.NAME,
     val sortOrder: SortOrder = SortOrder.ASCENDING,
+    val highRatedOnly: Boolean = false,
+    val highRatingThreshold: Int = 8,
     val isLoading: Boolean = false,
     val error: Exception? = null,
 )

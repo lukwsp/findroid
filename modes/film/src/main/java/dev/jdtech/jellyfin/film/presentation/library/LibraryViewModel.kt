@@ -2,7 +2,10 @@ package dev.jdtech.jellyfin.film.presentation.library
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import androidx.paging.PagingData
 import androidx.paging.cachedIn
+import androidx.paging.filter
+import kotlinx.coroutines.flow.map
 import dagger.hilt.android.lifecycle.HiltViewModel
 import dev.jdtech.jellyfin.models.CollectionType
 import dev.jdtech.jellyfin.models.SortBy
@@ -57,23 +60,32 @@ constructor(
             initSorting()
 
             try {
+                val threshold = _state.value.highRatingThreshold
+                val baseItems =
+                    jellyfinRepository.getItemsPaging(
+                        parentId = parentId,
+                        includeTypes = itemType,
+                        recursive = recursive,
+                        sortBy =
+                            if (
+                                libraryType == CollectionType.TvShows &&
+                                    sortBy == SortBy.DATE_PLAYED
+                            )
+                                SortBy.SERIES_DATE_PLAYED
+                            else sortBy, // Jellyfin uses a different enum for sorting series by
+                        // data played
+                        sortOrder = sortOrder,
+                    )
                 val items =
-                    jellyfinRepository
-                        .getItemsPaging(
-                            parentId = parentId,
-                            includeTypes = itemType,
-                            recursive = recursive,
-                            sortBy =
-                                if (
-                                    libraryType == CollectionType.TvShows &&
-                                        sortBy == SortBy.DATE_PLAYED
-                                )
-                                    SortBy.SERIES_DATE_PLAYED
-                                else sortBy, // Jellyfin uses a different enum for sorting series by
-                            // data played
-                            sortOrder = sortOrder,
-                        )
-                        .cachedIn(viewModelScope)
+                    (
+                        if (_state.value.highRatedOnly) {
+                            baseItems.map { paging ->
+                                paging.filter { item -> (item.myRating ?: 0f) >= threshold }
+                            }
+                        } else {
+                            baseItems
+                        }
+                    ).cachedIn(viewModelScope)
                 _state.emit(_state.value.copy(items = items))
             } catch (e: Exception) {
                 _state.emit(_state.value.copy(error = e))
@@ -104,6 +116,12 @@ constructor(
             is LibraryAction.ChangeSorting -> {
                 if (action.sortBy != this.sortBy || action.sortOrder != this.sortOrder) {
                     setSorting(sortBy = action.sortBy, sortOrder = action.sortOrder)
+                    loadItems()
+                }
+            }
+            is LibraryAction.SetHighRatedOnly -> {
+                if (action.enabled != _state.value.highRatedOnly) {
+                    _state.value = _state.value.copy(highRatedOnly = action.enabled)
                     loadItems()
                 }
             }

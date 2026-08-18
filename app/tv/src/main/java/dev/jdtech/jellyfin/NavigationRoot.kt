@@ -219,6 +219,7 @@ fun NavigationRoot(
                         )
                     )
                 },
+                navigateBack = { navController.popBackStack() },
             )
         }
         composable<SeasonRoute> { backStackEntry ->

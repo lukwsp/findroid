@@ -59,8 +59,11 @@ import coil3.compose.AsyncImage
 import dev.jdtech.jellyfin.core.R as CoreR
 import dev.jdtech.jellyfin.core.presentation.dummy.dummyEpisode
 import dev.jdtech.jellyfin.core.presentation.dummy.dummyShow
+import dev.jdtech.jellyfin.core.presentation.components.RatingSheet
+import dev.jdtech.jellyfin.core.presentation.components.RatingStarColor
 import dev.jdtech.jellyfin.core.presentation.theme.Yellow
 import dev.jdtech.jellyfin.film.presentation.show.ShowAction
+import dev.jdtech.jellyfin.film.presentation.show.ShowEvent
 import dev.jdtech.jellyfin.film.presentation.show.ShowState
 import dev.jdtech.jellyfin.film.presentation.show.ShowViewModel
 import dev.jdtech.jellyfin.models.FindroidItem
@@ -68,6 +71,7 @@ import dev.jdtech.jellyfin.presentation.theme.FindroidTheme
 import dev.jdtech.jellyfin.presentation.theme.spacings
 import dev.jdtech.jellyfin.ui.components.Direction
 import dev.jdtech.jellyfin.ui.components.ItemCard
+import dev.jdtech.jellyfin.utils.ObserveAsEvents
 import dev.jdtech.jellyfin.utils.getShowDateString
 import java.util.UUID
 
@@ -76,6 +80,7 @@ fun ShowScreen(
     showId: UUID,
     navigateToItem: (item: FindroidItem) -> Unit,
     navigateToPlayer: (itemId: UUID) -> Unit,
+    navigateBack: () -> Unit = {},
     viewModel: ShowViewModel = hiltViewModel(),
 ) {
     val context = LocalContext.current
@@ -84,6 +89,13 @@ fun ShowScreen(
     val state by viewModel.state.collectAsStateWithLifecycle()
 
     LaunchedEffect(true) { viewModel.loadShow(showId) }
+
+    ObserveAsEvents(viewModel.events) { event ->
+        when (event) {
+            is ShowEvent.ItemDeleted -> navigateBack()
+            is ShowEvent.Error -> Unit
+        }
+    }
 
     ShowScreenLayout(
         state = state,
@@ -110,6 +122,7 @@ fun ShowScreen(
 @Composable
 private fun ShowScreenLayout(state: ShowState, onAction: (ShowAction) -> Unit) {
     val focusRequester = remember { FocusRequester() }
+    var ratingSheetOpen by remember { mutableStateOf(false) }
     val configuration = LocalConfiguration.current
     val locale = configuration.locales.get(0)
 
@@ -317,6 +330,25 @@ private fun ShowScreenLayout(state: ShowState, onAction: (ShowAction) -> Unit) {
                                             )
                                     )
                                 }
+                                Button(onClick = { ratingSheetOpen = true }) {
+                                    Icon(
+                                        painter = painterResource(id = CoreR.drawable.ic_star),
+                                        contentDescription = null,
+                                        tint =
+                                            if (show.myRating != null) RatingStarColor
+                                            else LocalContentColor.current,
+                                    )
+                                    Spacer(modifier = Modifier.width(6.dp))
+                                    Text(
+                                        text =
+                                            show.myRating?.let {
+                                                stringResource(
+                                                    CoreR.string.rating_value,
+                                                    it.toInt(),
+                                                )
+                                            } ?: stringResource(CoreR.string.rating)
+                                    )
+                                }
                             }
                             Spacer(modifier = Modifier.height(MaterialTheme.spacings.default))
                             Row(
@@ -387,6 +419,28 @@ private fun ShowScreenLayout(state: ShowState, onAction: (ShowAction) -> Unit) {
 
             LaunchedEffect(true) { focusRequester.requestFocus() }
         } ?: run { CircularProgressIndicator(modifier = Modifier.align(Alignment.Center)) }
+    }
+
+    if (ratingSheetOpen) {
+        state.show?.let { show ->
+            RatingSheet(
+                itemName = show.name,
+                currentRating = show.myRating,
+                onRate = { rating ->
+                    ratingSheetOpen = false
+                    onAction(ShowAction.SetRating(rating))
+                },
+                onClearRating = {
+                    ratingSheetOpen = false
+                    onAction(ShowAction.ClearRating)
+                },
+                onDelete = {
+                    ratingSheetOpen = false
+                    onAction(ShowAction.DeleteItem)
+                },
+                onDismiss = { ratingSheetOpen = false },
+            )
+        }
     }
 }
 

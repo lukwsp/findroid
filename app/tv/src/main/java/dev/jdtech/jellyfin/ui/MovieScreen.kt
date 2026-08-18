@@ -46,12 +46,16 @@ import coil3.compose.AsyncImage
 import dev.jdtech.jellyfin.core.R as CoreR
 import dev.jdtech.jellyfin.core.presentation.dummy.dummyMovie
 import dev.jdtech.jellyfin.core.presentation.dummy.dummyVideoMetadata
+import dev.jdtech.jellyfin.core.presentation.components.RatingSheet
+import dev.jdtech.jellyfin.core.presentation.components.RatingStarColor
 import dev.jdtech.jellyfin.core.presentation.theme.Yellow
 import dev.jdtech.jellyfin.film.presentation.movie.MovieAction
+import dev.jdtech.jellyfin.film.presentation.movie.MovieEvent
 import dev.jdtech.jellyfin.film.presentation.movie.MovieState
 import dev.jdtech.jellyfin.film.presentation.movie.MovieViewModel
 import dev.jdtech.jellyfin.presentation.theme.FindroidTheme
 import dev.jdtech.jellyfin.presentation.theme.spacings
+import dev.jdtech.jellyfin.utils.ObserveAsEvents
 import dev.jdtech.jellyfin.utils.format
 import java.util.UUID
 
@@ -59,11 +63,19 @@ import java.util.UUID
 fun MovieScreen(
     movieId: UUID,
     navigateToPlayer: (itemId: UUID) -> Unit,
+    navigateBack: () -> Unit = {},
     viewModel: MovieViewModel = hiltViewModel(),
 ) {
     val state by viewModel.state.collectAsStateWithLifecycle()
 
     LaunchedEffect(true) { viewModel.loadMovie(movieId = movieId) }
+
+    ObserveAsEvents(viewModel.events) { event ->
+        when (event) {
+            is MovieEvent.ItemDeleted -> navigateBack()
+            is MovieEvent.Error -> Unit
+        }
+    }
 
     MovieScreenLayout(
         state = state,
@@ -84,6 +96,7 @@ private fun MovieScreenLayout(state: MovieState, onAction: (MovieAction) -> Unit
     val focusRequester = remember { FocusRequester() }
     val configuration = LocalConfiguration.current
     val locale = configuration.locales.get(0)
+    var ratingSheetOpen by remember { mutableStateOf(false) }
 
     Box(modifier = Modifier.fillMaxSize()) {
         state.movie?.let { movie ->
@@ -248,6 +261,22 @@ private fun MovieScreenLayout(state: MovieState, onAction: (MovieAction) -> Unit
                                     )
                             )
                         }
+                        Button(onClick = { ratingSheetOpen = true }) {
+                            Icon(
+                                painter = painterResource(id = CoreR.drawable.ic_star),
+                                contentDescription = null,
+                                tint =
+                                    if (movie.myRating != null) RatingStarColor
+                                    else LocalContentColor.current,
+                            )
+                            Spacer(modifier = Modifier.width(6.dp))
+                            Text(
+                                text =
+                                    movie.myRating?.let {
+                                        stringResource(CoreR.string.rating_value, it.toInt())
+                                    } ?: stringResource(CoreR.string.rating)
+                            )
+                        }
                     }
                     Spacer(modifier = Modifier.height(MaterialTheme.spacings.default))
                     Row(
@@ -301,6 +330,28 @@ private fun MovieScreenLayout(state: MovieState, onAction: (MovieAction) -> Unit
 
             LaunchedEffect(true) { focusRequester.requestFocus() }
         } ?: run { CircularProgressIndicator(modifier = Modifier.align(Alignment.Center)) }
+    }
+
+    if (ratingSheetOpen) {
+        state.movie?.let { movie ->
+            RatingSheet(
+                itemName = movie.name,
+                currentRating = movie.myRating,
+                onRate = { rating ->
+                    ratingSheetOpen = false
+                    onAction(MovieAction.SetRating(rating))
+                },
+                onClearRating = {
+                    ratingSheetOpen = false
+                    onAction(MovieAction.ClearRating)
+                },
+                onDelete = {
+                    ratingSheetOpen = false
+                    onAction(MovieAction.DeleteItem)
+                },
+                onDismiss = { ratingSheetOpen = false },
+            )
+        }
     }
 }
 

@@ -1,4 +1,4 @@
-package dev.jdtech.jellyfin.presentation.film.components
+package dev.jdtech.jellyfin.core.presentation.components
 
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
@@ -32,7 +32,7 @@ import dev.jdtech.jellyfin.core.R as CoreR
 
 private val StarColor = Color(0xFFFFC107)
 
-internal val RatingStarColor = StarColor
+val RatingStarColor = StarColor
 
 /**
  * Bottom sheet for rating an item (1-10 stars) and optionally deleting it from the server.

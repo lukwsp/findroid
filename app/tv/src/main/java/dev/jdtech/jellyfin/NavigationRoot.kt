@@ -197,6 +197,7 @@ fun NavigationRoot(
                         )
                     )
                 },
+                navigateBack = { navController.popBackStack() },
             )
         }
         composable<ShowRoute> { backStackEntry ->

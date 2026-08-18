@@ -106,4 +106,7 @@
     <string name="advanced">Advanced</string>
     <string name="discard_changes_dialog_title">Discard changes?</string>
     <string name="discard_changes_dialog_text">You have unsaved changes.</string>
+    <string name="settings_category_ratings">Ratings</string>
+    <string name="settings_high_rating_threshold">High rating threshold</string>
+    <string name="settings_high_rating_threshold_message">Minimum rating (1-10) for the highly rated library filter</string>
 </resources>

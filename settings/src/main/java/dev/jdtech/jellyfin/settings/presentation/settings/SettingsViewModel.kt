@@ -693,6 +693,35 @@ class SettingsViewModel @Inject constructor(private val appPreferences: AppPrefe
                                             )
                                     )
                                 ),
+                        ),
+                        PreferenceCategory(
+                            nameStringResource = R.string.settings_category_ratings,
+                            iconDrawableId = R.drawable.ic_star,
+                            onClick = {
+                                viewModelScope.launch {
+                                    eventsChannel.send(
+                                        SettingsEvent.NavigateToSettings(
+                                            intArrayOf(it.nameStringResource)
+                                        )
+                                    )
+                                }
+                            },
+                            nestedPreferenceGroups =
+                                listOf(
+                                    PreferenceGroup(
+                                        preferences =
+                                            listOf(
+                                                PreferenceIntInput(
+                                                    nameStringResource =
+                                                        R.string.settings_high_rating_threshold,
+                                                    descriptionStringRes =
+                                                        R.string.settings_high_rating_threshold_message,
+                                                    backendPreference =
+                                                        appPreferences.highRatingThreshold,
+                                                ),
+                                            )
+                                    )
+                                ),
                         )
                     )
             ),

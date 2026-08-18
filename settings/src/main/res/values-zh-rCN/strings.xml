@@ -100,4 +100,7 @@
     <string name="media_segments_type_outro">片尾</string>
     <string name="media_segments_type_intro">片头</string>
     <string name="pref_player_media_segments_skip_button_duration">显示跳过按钮</string>
+    <string name="settings_category_ratings">评分</string>
+    <string name="settings_high_rating_threshold">高分阈值</string>
+    <string name="settings_high_rating_threshold_message">高分片单的最低评分（1-10）</string>
 </resources>

@@ -57,6 +57,12 @@ constructor(
         viewModelScope.launch {
             _state.emit(_state.value.copy(isLoading = true, error = null))
 
+            _state.value =
+                _state.value.copy(
+                    highRatingThreshold =
+                        appPreferences.getValue(appPreferences.highRatingThreshold).coerceIn(1, 10)
+                )
+
             initSorting()
 
             try {

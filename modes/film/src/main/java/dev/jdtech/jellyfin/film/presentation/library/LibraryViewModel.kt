@@ -8,6 +8,7 @@ import androidx.paging.filter
 import kotlinx.coroutines.flow.map
 import dagger.hilt.android.lifecycle.HiltViewModel
 import dev.jdtech.jellyfin.models.CollectionType
+import dev.jdtech.jellyfin.models.FindroidFolder
 import dev.jdtech.jellyfin.models.SortBy
 import dev.jdtech.jellyfin.models.SortOrder
 import dev.jdtech.jellyfin.repository.JellyfinRepository
@@ -43,7 +44,7 @@ constructor(
     fun loadItems() {
         val itemType =
             when (libraryType) {
-                CollectionType.Movies -> listOf(BaseItemKind.MOVIE)
+                CollectionType.Movies -> listOf(BaseItemKind.FOLDER, BaseItemKind.MOVIE)
                 CollectionType.HomeVideos -> listOf(BaseItemKind.VIDEO)
                 CollectionType.TvShows -> listOf(BaseItemKind.SERIES)
                 CollectionType.BoxSets -> listOf(BaseItemKind.BOX_SET)
@@ -87,7 +88,9 @@ constructor(
                     (
                         if (_state.value.highRatedOnly) {
                             baseItems.map { paging ->
-                                paging.filter { item -> (item.myRating ?: 0f) >= threshold }
+                                paging.filter { item ->
+                                    item is FindroidFolder || (item.myRating ?: 0f) >= threshold
+                                }
                             }
                         } else {
                             baseItems

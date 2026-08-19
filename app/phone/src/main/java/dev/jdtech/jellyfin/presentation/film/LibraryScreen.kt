@@ -145,7 +145,7 @@ private fun LibraryScreenLayout(
             )
         },
     ) { innerPadding ->
-        Column {
+        Column(modifier = Modifier.fillMaxSize()) {
             Row(
                 modifier =
                     Modifier
@@ -188,8 +188,10 @@ private fun LibraryScreenLayout(
             )
             LazyVerticalGrid(
                 columns = GridCellsAdaptiveWithMinColumns(minSize = 160.dp, minColumns = 2),
-                modifier = Modifier.fillMaxSize(),
-                contentPadding = contentPadding + innerPadding,
+                modifier = Modifier.fillMaxWidth().weight(1f),
+                contentPadding =
+                    contentPadding +
+                        PaddingValues(bottom = innerPadding.calculateBottomPadding()),
                 horizontalArrangement = Arrangement.spacedBy(MaterialTheme.spacings.default),
                 verticalArrangement = Arrangement.spacedBy(MaterialTheme.spacings.default),
             ) {

@@ -44,6 +44,7 @@ import androidx.paging.PagingData
 import androidx.paging.compose.collectAsLazyPagingItems
 import androidx.paging.compose.itemKey
 import dev.jdtech.jellyfin.core.R as CoreR
+import dev.jdtech.jellyfin.core.presentation.components.RatingSheet
 import dev.jdtech.jellyfin.core.presentation.dummy.dummyMovies
 import dev.jdtech.jellyfin.film.presentation.library.LibraryAction
 import dev.jdtech.jellyfin.film.presentation.library.LibraryState
@@ -111,6 +112,8 @@ private fun LibraryScreenLayout(
 
     val scrollBehavior = TopAppBarDefaults.pinnedScrollBehavior()
 
+    var ratingSheetItem by remember { mutableStateOf<FindroidItem?>(null) }
+
     var showSortByDialog by remember { mutableStateOf(false) }
 
     Scaffold(
@@ -149,7 +152,8 @@ private fun LibraryScreenLayout(
                         .fillMaxWidth()
                         .padding(
                             horizontal = MaterialTheme.spacings.default,
-                        ),
+                        )
+                        .padding(top = innerPadding.calculateTopPadding()),
                 horizontalArrangement = Arrangement.spacedBy(MaterialTheme.spacings.small),
             ) {
                 FilterChip(
@@ -196,12 +200,33 @@ private fun LibraryScreenLayout(
                             item = item,
                             direction = Direction.VERTICAL,
                             onClick = { onAction(LibraryAction.OnItemClick(item)) },
+                            onLongClick = { ratingSheetItem = item },
                             modifier = Modifier.animateItem(),
                         )
                     }
                 }
             }
         }
+    }
+
+    ratingSheetItem?.let { sheetItem ->
+        RatingSheet(
+            itemName = sheetItem.name,
+            currentRating = sheetItem.myRating,
+            onRate = { rating ->
+                onAction(LibraryAction.SetRating(sheetItem.id, rating))
+                ratingSheetItem = null
+            },
+            onClearRating = {
+                onAction(LibraryAction.ClearRating(sheetItem.id))
+                ratingSheetItem = null
+            },
+            onDelete = {
+                onAction(LibraryAction.DeleteItem(sheetItem.id))
+                ratingSheetItem = null
+            },
+            onDismiss = { ratingSheetItem = null },
+        )
     }
 
     if (showSortByDialog) {

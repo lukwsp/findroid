@@ -119,4 +119,5 @@
     <string name="rating">评分</string>
     <string name="filter_all">全部</string>
     <string name="filter_high_rated">高分（≥%1$d）</string>
+    <string name="rating_short">★ %1$d</string>
 </resources>

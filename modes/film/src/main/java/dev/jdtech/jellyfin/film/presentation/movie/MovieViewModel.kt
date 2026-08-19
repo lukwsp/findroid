@@ -128,7 +128,7 @@ constructor(
             is MovieAction.DeleteItem -> {
                 viewModelScope.launch {
                     try {
-                        repository.deleteItem(movieId)
+                        repository.scheduleDeletion(movieId)
                         _events.emit(MovieEvent.ItemDeleted)
                     } catch (e: Exception) {
                         _events.emit(MovieEvent.Error(e))

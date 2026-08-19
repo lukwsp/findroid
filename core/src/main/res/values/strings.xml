@@ -120,4 +120,5 @@
     <string name="rating">Rating</string>
     <string name="filter_all">All</string>
     <string name="filter_high_rated">Highly rated (≥%1$d)</string>
+    <string name="rating_short">★ %1$d</string>
 </resources>

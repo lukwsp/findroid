@@ -126,7 +126,7 @@ class ShowViewModel @Inject constructor(private val repository: JellyfinReposito
             is ShowAction.DeleteItem -> {
                 viewModelScope.launch {
                     try {
-                        repository.deleteItem(showId)
+                        repository.scheduleDeletion(showId)
                         _events.emit(ShowEvent.ItemDeleted)
                     } catch (e: Exception) {
                         _events.emit(ShowEvent.Error(e))

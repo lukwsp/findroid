@@ -572,6 +572,21 @@ class JellyfinRepositoryImpl(
         }
     }
 
+    override suspend fun scheduleDeletion(itemId: UUID) {
+        withContext(Dispatchers.IO) {
+            val response =
+                jellyfinApi.api.request(
+                    method = org.jellyfin.sdk.api.client.HttpMethod.POST,
+                    pathTemplate = "/Ratings/Media/{itemId}/ScheduleDeletion",
+                    pathParameters = mapOf("itemId" to itemId),
+                    queryParameters = mapOf("delayDays" to 3),
+                )
+            if (response.status !in 200..299) {
+                error("Failed to schedule deletion for $itemId: HTTP ${response.status}")
+            }
+        }
+    }
+
     override fun getBaseUrl() = jellyfinApi.api.baseUrl.orEmpty()
 
     override suspend fun updateDeviceName(name: String) {

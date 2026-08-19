@@ -112,7 +112,7 @@ constructor(
             is EpisodeAction.DeleteItem -> {
                 viewModelScope.launch {
                     try {
-                        repository.deleteItem(episodeId)
+                        repository.scheduleDeletion(episodeId)
                         _events.emit(EpisodeEvent.ItemDeleted)
                     } catch (e: Exception) {
                         _events.emit(EpisodeEvent.Error(e))

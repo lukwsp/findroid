@@ -127,6 +127,12 @@ interface JellyfinRepository {
      */
     suspend fun deleteItem(itemId: UUID)
 
+    /**
+     * Submit a deletion request to the Ratings plugin (web-compatible flow):
+     * schedules deletion of the physical files after the configured delay (default 7 days).
+     */
+    suspend fun scheduleDeletion(itemId: UUID)
+
     fun getBaseUrl(): String
 
     suspend fun updateDeviceName(name: String)

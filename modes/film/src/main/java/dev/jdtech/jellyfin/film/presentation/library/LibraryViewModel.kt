@@ -135,6 +135,35 @@ constructor(
                     loadItems()
                 }
             }
+            is LibraryAction.SetRating -> {
+                viewModelScope.launch {
+                    try {
+                        jellyfinRepository.setRating(action.itemId, action.rating)
+                        loadItems()
+                    } catch (e: Exception) {
+                        _state.value = _state.value.copy(error = e)
+                    }
+                }
+            }
+            is LibraryAction.ClearRating -> {
+                viewModelScope.launch {
+                    try {
+                        jellyfinRepository.clearRating(action.itemId)
+                        loadItems()
+                    } catch (e: Exception) {
+                        _state.value = _state.value.copy(error = e)
+                    }
+                }
+            }
+            is LibraryAction.DeleteItem -> {
+                viewModelScope.launch {
+                    try {
+                        jellyfinRepository.scheduleDeletion(action.itemId)
+                    } catch (e: Exception) {
+                        _state.value = _state.value.copy(error = e)
+                    }
+                }
+            }
             else -> Unit
         }
     }

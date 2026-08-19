@@ -92,7 +92,7 @@ constructor(
 
     suspend fun clearRating(itemId: UUID) = repository.clearRating(itemId)
 
-    suspend fun deleteItem(itemId: UUID) = repository.deleteItem(itemId)
+    suspend fun deleteItem(itemId: UUID) = repository.scheduleDeletion(itemId)
 
     suspend fun getItem(itemId: UUID) = repository.getItem(itemId)
 

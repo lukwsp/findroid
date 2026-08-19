@@ -1,6 +1,7 @@
 package dev.jdtech.jellyfin.presentation.film.components
 
-import androidx.compose.foundation.clickable
+import androidx.compose.foundation.ExperimentalFoundationApi
+import androidx.compose.foundation.combinedClickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -29,11 +30,13 @@ import dev.jdtech.jellyfin.models.isDownloaded
 import dev.jdtech.jellyfin.presentation.theme.FindroidTheme
 import dev.jdtech.jellyfin.presentation.theme.spacings
 
+@OptIn(ExperimentalFoundationApi::class)
 @Composable
 fun ItemCard(
     item: FindroidItem,
     direction: Direction,
     onClick: (FindroidItem) -> Unit,
+    onLongClick: () -> Unit = {},
     modifier: Modifier = Modifier,
 ) {
     val width =
@@ -46,11 +49,18 @@ fun ItemCard(
             modifier
                 .width(width.dp)
                 .clip(MaterialTheme.shapes.small)
-                .clickable(onClick = { onClick(item) })
+                .combinedClickable(onClick = { onClick(item) }, onLongClick = { onLongClick() })
     ) {
         Surface(shape = MaterialTheme.shapes.small) {
             Box {
                 ItemPoster(item = item, direction = direction)
+                item.myRating?.let { rating ->
+                    RatingBadge(
+                        rating = rating,
+                        modifier =
+                            Modifier.align(Alignment.TopStart).padding(MaterialTheme.spacings.small),
+                    )
+                }
                 Row(
                     modifier =
                         Modifier.align(Alignment.TopEnd).padding(MaterialTheme.spacings.small),

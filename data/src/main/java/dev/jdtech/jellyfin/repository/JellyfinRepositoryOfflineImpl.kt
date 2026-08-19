@@ -309,6 +309,10 @@ class JellyfinRepositoryOfflineImpl(
         throw UnsupportedOperationException("Delete is not supported in offline mode")
     }
 
+    override suspend fun scheduleDeletion(itemId: UUID) {
+        throw UnsupportedOperationException("Scheduled deletion is not supported in offline mode")
+    }
+
     override fun getBaseUrl(): String {
         return ""
     }
